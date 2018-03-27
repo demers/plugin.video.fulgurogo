@@ -11,47 +11,52 @@ then
 	exit 0
 fi
 
+nom=$4
+rep="plugin.video.${nom,,}"
+minuscule="${nom,,}"
+
 echo "Voici les paramètres entrés:"
 echo "  icon = $1"
 echo "  fanart = $2"
 echo "  titre = $3"
 echo "  user = $4"
+echo "  Le nom du plugin sera: $rep"
 read -n1 -r -p "Est-ce correct? Tapez o pour oui." key
+echo ""
 if [ "$key" != "o" ]
 then
     echo "Arrêt."
-    echo 1
+    exit 1
 fi
 
-git clone https://github.com/demers/plugin.video.fulgurogo.git
+echo "Clone du Github Fulgurogo..."
+git clone -q https://github.com/demers/plugin.video.fulgurogo.git "$rep"
 
-nom=$4
-rep="plugin.video.${nom,,}"
-mv -f plugin.video.fulgurogo $rep
-mkdir -v $rep
-
-cp -f "$1" "$rep"
-cp -f "$2" "$rep"
 rm -f "$rep/icon.jpg"
 rm -f "$rep/fanart.png"
+cp -f "$1" "$rep"
+cp -f "$2" "$rep"
 rm -f "$rep/README.md"
 rm -f "$rep/create_new_plugin.bash"
+rm -f -r "$rep/.git"
 
 printf "$RED Remplacement du icon par $1 $NC \n"
-sed -i -e 's/icon.jpg/$1/g' "$rep/addon.xml"
+sed -i -e "s/icon.jpg/$1/g" "$rep/addon.xml"
 
 printf "$RED Remplacement du fanart par $2 $NC \n"
-sed -i -e 's/fanart.png/$2/g' "$rep/addon.xml"
+sed -i -e "s/fanart.png/$2/g" "$rep/addon.xml"
 
 printf "$RED Remplacement du titre par $3 $NC \n"
-sed -i -e 's/Fulguro Go/$3/g' "$rep/addon.xml"
-sed -i -e 's/Fulguro Go/$3/g' "$rep/default.py"
+sed -i -e "s/Fulguro Go/$3/g" "$rep/addon.xml"
+sed -i -e "s/Fulguro Go/$3/g" "$rep/default.py"
 
 printf "$RED Remplacement du mot d'accès (FulguroGo) par $4 $NC \n"
-sed -i -e 's/FulguroGo/$4/g' "$rep/addon.xml"
+sed -i -e "s/fulgurogo/$minuscule/g" "$rep/addon.xml"
+sed -i -e "s/fulgurogo/$minuscule/g" "$rep/default.py"
+sed -i -e "s/FulguroGo/$nom/g" "$rep/default.py"
 
-zip "$nom" "$nom/*"
+zip -r "${rep}.zip" "$rep"
 
-rm -f -r "$nom"
+rm -f -r "$rep"
 
 
