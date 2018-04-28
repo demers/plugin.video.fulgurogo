@@ -7,7 +7,10 @@ if [ $# -eq 0 ]
 then
     echo "usage: 4 paramètres: (1) icon (image) (2) fanart (image)"
     echo "(3) Titre de la chaîne Youtube (4) mot d'accès Youtube du type"
-    echo "https://www.youtube.com/user/<ACCES>"
+    echo "(5) -channel pour obtenir www.youtube.com/channel/... plutôt que"
+    echo "    www.youtube.com/user/..."
+    echo "L'URL sera soit: https://www.youtube.com/user/<ACCES>"
+    echo "ou https://www.youtube.com/channel/<ACCES>"
 	exit 0
 fi
 
@@ -15,11 +18,20 @@ nom=$4
 rep="plugin.video.${nom,,}"
 minuscule="${nom,,}"
 
+type="user"
+if [ ! -z "$5" ]
+then
+    if [ "$5" == "-channel" ]
+    then
+        type="channel"
+    fi
+fi
+
 echo "Voici les paramètres entrés:"
 echo "  icon = $1"
 echo "  fanart = $2"
 echo "  titre = $3"
-echo "  user = $4"
+echo "  $type = $4"
 echo "  Le nom du plugin sera: $rep"
 read -n1 -r -p "Est-ce correct? Tapez o pour oui." key
 echo ""
@@ -54,6 +66,12 @@ printf "$RED Remplacement du mot d'accès (FulguroGo) par $4 $NC \n"
 sed -i -e "s/fulgurogo/$minuscule/g" "$rep/addon.xml"
 sed -i -e "s/fulgurogo/$minuscule/g" "$rep/default.py"
 sed -i -e "s/FulguroGo/$nom/g" "$rep/default.py"
+
+if [ "$type" == "channel" ]
+then
+    printf "$RED Remplacement du user par channel. $NC \n"
+    sed -i -e "s/user/channel/g" "$rep/default.py"
+fi
 
 zip -r "${rep}.zip" "$rep"
 
